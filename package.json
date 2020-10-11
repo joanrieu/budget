@@ -1,0 +1,25 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "scripts": {
+    "prestart": "ts-node src/build.ts",
+    "start": "parcel serve src/index.html"
+  },
+  "author": "Joan Rieu <joan@joanrieu.com>",
+  "dependencies": {
+    "@types/lodash": "^4.14.162",
+    "@types/node": "^14.11.8",
+    "@types/react": "^16.9.51",
+    "@types/react-dom": "^16.9.8",
+    "csvtojson": "^2.0.10",
+    "lodash": "^4.17.20",
+    "minireset.css": "0.0.6",
+    "mobx": "^6.0.1",
+    "mobx-react": "^7.0.0",
+    "parcel-bundler": "^1.12.4",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.3"
+  }
+}
