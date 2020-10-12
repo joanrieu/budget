@@ -3,13 +3,17 @@ import { writeFileSync } from "fs";
 import config from "../config.json";
 
 Promise.all(
-  [...config.transactions.savings, ...config.transactions.credit].map((path) =>
-    csv({
-      delimiter: "auto",
-      colParser: {
-        Amount: (x) => (config.transactions.credit.includes(path) ? -x : +x),
-      },
-    }).fromFile(path)
+  Object.entries(config.accounts).flatMap(([name, account]) =>
+    account.files.map((path) =>
+      csv({
+        delimiter: "auto",
+        colParser: {
+          Amount: account.type === "credit" ? (x) => -x : Number,
+        },
+      })
+        .fromFile(path)
+        .then((file) => file.map((row) => ({ Account: name, ...row })))
+    )
   )
 )
   .then(([file, ...files]) => file.concat(...files))
