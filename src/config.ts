@@ -2,12 +2,18 @@ import configJson from "../config.json";
 
 export interface Config {
   accounts: Record<string, Account>;
-  groups: Record<string, Record<string, Category>>;
+  budget: Budget;
 }
 
 export type Account = {
   type: "debit" | "credit";
+  currency: string;
   files: string[];
+};
+
+export type Budget = {
+  currency: string;
+  groups: Record<string, Record<string, Category>>;
 };
 
 export type Category = {

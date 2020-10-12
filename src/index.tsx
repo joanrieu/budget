@@ -13,13 +13,15 @@ function isGroupExcluded(group: string) {
 }
 
 function getParentGroupName(category: string) {
-  return Object.entries(config.groups)
+  return Object.entries(config.budget.groups)
     .map(([name, group]) => ({ name, group }))
     .find(({ group }) => category in group)?.name;
 }
 
 function getCategoryConfig(category: string) {
-  const group = Object.values(config.groups).find((group) => category in group);
+  const group = Object.values(config.budget.groups).find(
+    (group) => category in group
+  );
   return group?.[category];
 }
 
@@ -116,6 +118,20 @@ const Subsection = observer(
   )
 );
 
+const Amount = ({ amount, currency }: { amount: number; currency: string }) => (
+  <div
+    style={{
+      opacity: amount ? undefined : "0.3",
+    }}
+  >
+    {new Intl.NumberFormat(navigator.language, {
+      style: "currency",
+      currency,
+      signDisplay: "exceptZero",
+    } as Intl.NumberFormatOptions).format(amount)}
+  </div>
+);
+
 const Calendar = observer(() => (
   <Section name="Calendar">
     <form
@@ -152,7 +168,7 @@ const Calendar = observer(() => (
 
 const CategoryList = observer(() => (
   <Section name="Categories">
-    {Object.entries(config.groups).map(
+    {Object.entries(config.budget.groups).map(
       ([name, group]) =>
         !isGroupExcluded(name) && (
           <Subsection key={name} name={name}>
@@ -181,27 +197,21 @@ const CategoryLine = observer(
         style={{
           borderBottom: "1px solid #bbb",
           marginBottom: "-1px",
+          padding: "16px 32px",
+          display: "grid",
+          gridTemplateColumns: "16px 1fr auto",
+          gap: "16px",
+          lineHeight: "1",
         }}
       >
+        <div style={{ placeSelf: "center" }}>{getCategoryIcon(name)}</div>
+        <div style={{ placeSelf: "center start" }}>{name}</div>
         <div
           style={{
-            padding: "16px 32px",
-            display: "grid",
-            gridTemplateColumns: "16px 1fr auto",
-            gap: "16px",
-            lineHeight: "1",
-            opacity: activity ? undefined : "0.3",
+            placeSelf: "center end",
           }}
         >
-          <div style={{ placeSelf: "center" }}>{getCategoryIcon(name)}</div>
-          <div style={{ placeSelf: "center start" }}>{name}</div>
-          <div style={{ placeSelf: "center end" }}>
-            {new Intl.NumberFormat(navigator.language, {
-              style: "currency",
-              currency: "CAD",
-              signDisplay: "exceptZero",
-            } as Intl.NumberFormatOptions).format(activity)}
-          </div>
+          <Amount amount={activity} currency={config.budget.currency} />
         </div>
       </div>
     );
@@ -290,9 +300,12 @@ const TransactionLine = observer(
       >
         {transaction.Category}
       </div>
-      <pre style={{ gridArea: "amount", placeSelf: "center" }}>
-        {transaction.Amount.toFixed(2)}
-      </pre>
+      <div style={{ gridArea: "amount", placeSelf: "center" }}>
+        <Amount
+          amount={transaction.Amount}
+          currency={getAccount(transaction.Account).currency}
+        />
+      </div>
     </div>
   )
 );
