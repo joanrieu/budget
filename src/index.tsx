@@ -64,7 +64,7 @@ const App = observer(() => (
       gridTemplateColumns: "1fr 3fr",
     }}
   >
-    <div style={{ overflow: "auto" }}>
+    <div>
       <Title />
       <Calendar />
       <Menu />
@@ -73,9 +73,9 @@ const App = observer(() => (
       style={{
         border: "1px solid #bbb",
         borderWidth: "0 1px",
-        height: "100%",
-        overflow: "auto",
         background: "#eee",
+        display: "grid",
+        overflow: "hidden",
       }}
     >
       {ui.page === "budget" && <CategoryList />}
@@ -84,18 +84,27 @@ const App = observer(() => (
   </div>
 ));
 
-const SidebarItem = observer(({ children }: { children: React.ReactNode }) => (
-  <div
-    style={{
-      border: "1px solid #bbb",
-      background: "#eee",
-      margin: "32px",
-      marginLeft: "0",
-    }}
-  >
-    {children}
-  </div>
-));
+const SidebarItem = observer(
+  ({
+    style,
+    children,
+  }: {
+    style?: CSSProperties;
+    children: React.ReactNode;
+  }) => (
+    <div
+      style={{
+        border: "1px solid #bbb",
+        background: "#eee",
+        margin: "32px",
+        marginLeft: "0",
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+);
 
 const Title = observer(() => (
   <SidebarItem>
@@ -114,55 +123,37 @@ const Title = observer(() => (
   </SidebarItem>
 ));
 
-const Section = observer(
-  ({
-    name,
-    children,
-    style,
-  }: {
-    name: string;
-    children: React.ReactNode;
-    style?: CSSProperties;
-  }) => (
-    <div
+const SectionHeader = observer(
+  ({ children }: { children: React.ReactNode }) => (
+    <h2
       style={{
-        paddingBottom: "32px",
-        ...style,
+        fontSize: "130%",
+        letterSpacing: ".2ch",
+        padding: "32px 32px 16px",
+        borderBottom: "1px solid #bbb",
       }}
     >
-      <h2
-        style={{
-          fontSize: "130%",
-          letterSpacing: ".2ch",
-          padding: "32px",
-        }}
-      >
-        {name}
-      </h2>
       {children}
-    </div>
+    </h2>
   )
 );
 
-const Subsection = observer(
-  ({ name, children }: { name: string; children: React.ReactNode }) => (
-    <div>
-      <h3
-        style={{
-          textTransform: "uppercase",
-          fontSize: "80%",
-          letterSpacing: ".2ch",
-          color: "grey",
-          background: "#ddd",
-          border: "1px solid #bbb",
-          borderWidth: "1px 0",
-          padding: "16px 32px",
-        }}
-      >
-        {name}
-      </h3>
+const SubsectionHeader = observer(
+  ({ first, children }: { first: boolean; children: React.ReactNode }) => (
+    <h3
+      style={{
+        textTransform: "uppercase",
+        fontSize: "80%",
+        letterSpacing: ".2ch",
+        color: "grey",
+        background: "#ddd",
+        border: "1px solid #bbb",
+        borderWidth: first ? "0 0 1px" : "1px 0",
+        padding: "16px 32px",
+      }}
+    >
       {children}
-    </div>
+    </h3>
   )
 );
 
@@ -183,48 +174,48 @@ const Amount = observer(
 );
 
 const Calendar = observer(() => (
-  <SidebarItem>
-    <Section name="Calendar">
-      <form
-        style={{
-          display: "grid",
-          gridTemplateColumns: "80px 64px",
-          padding: "0 32px",
-          gap: "16px",
-        }}
-        onSubmit={(event) => event.preventDefault()}
-      >
-        <input
-          type="number"
-          name="year"
-          defaultValue={ui.year}
-          onChange={(event) =>
-            runInAction(() => (ui.year = Number(event.target.value)))
-          }
-          style={{ font: "inherit", padding: "8px" }}
-        />
-        <input
-          type="number"
-          name="month"
-          min={1}
-          max={12}
-          defaultValue={ui.month}
-          onChange={(event) =>
-            runInAction(() => (ui.month = Number(event.target.value)))
-          }
-          style={{ font: "inherit", padding: "8px" }}
-        />
-      </form>
-    </Section>
+  <SidebarItem
+    style={{
+      padding: "32px 0",
+    }}
+  >
+    <form
+      style={{
+        display: "grid",
+        gridTemplateColumns: "80px 64px",
+        padding: "0 32px",
+        gap: "16px",
+      }}
+      onSubmit={(event) => event.preventDefault()}
+    >
+      <input
+        type="number"
+        name="year"
+        defaultValue={ui.year}
+        onChange={(event) =>
+          runInAction(() => (ui.year = Number(event.target.value)))
+        }
+        style={{ font: "inherit", padding: "8px" }}
+      />
+      <input
+        type="number"
+        name="month"
+        min={1}
+        max={12}
+        defaultValue={ui.month}
+        onChange={(event) =>
+          runInAction(() => (ui.month = Number(event.target.value)))
+        }
+        style={{ font: "inherit", padding: "8px" }}
+      />
+    </form>
   </SidebarItem>
 ));
 
 const Menu = observer(() => (
   <SidebarItem>
-    <Section name="Menu">
-      <MenuItem page="budget">Budget</MenuItem>
-      <MenuItem page="transactions">Transactions</MenuItem>
-    </Section>
+    <MenuItem page="budget">Budget</MenuItem>
+    <MenuItem page="transactions">Transactions</MenuItem>
   </SidebarItem>
 ));
 
@@ -243,9 +234,16 @@ const MenuItem = observer(
         font: "inherit",
         color: "inherit",
         textDecoration: "inherit",
-        padding: "16px 32px",
-        background: ui.page === page ? "#ccc" : "#ddd",
-        fontWeight: ui.page === page ? "bold" : undefined,
+        lineHeight: 3,
+        padding: "0 32px",
+        ...(ui.page === page
+          ? {
+              fontWeight: "bold",
+              borderRight: "4px solid firebrick",
+            }
+          : {
+              background: "#ddd",
+            }),
       }}
     >
       {children}
@@ -254,18 +252,32 @@ const MenuItem = observer(
 );
 
 const CategoryList = observer(() => (
-  <Section name="Categories">
-    {Object.entries(config.budget.groups).map(
-      ([name, group]) =>
-        !isGroupExcluded(name) && (
-          <Subsection key={name} name={name}>
-            {Object.entries(group).map(([name, category]) => (
-              <CategoryLine key={name} name={name} category={category} />
-            ))}
-          </Subsection>
-        )
-    )}
-  </Section>
+  <div
+    style={{
+      display: "grid",
+      gridTemplateRows: "auto 1fr",
+      overflow: "hidden",
+    }}
+  >
+    <SectionHeader>Categories</SectionHeader>
+    <div
+      style={{
+        overflow: "auto",
+      }}
+    >
+      {Object.entries(config.budget.groups).map(
+        ([name, group], i) =>
+          !isGroupExcluded(name) && (
+            <div key={name}>
+              <SubsectionHeader first={!i}>{name}</SubsectionHeader>
+              {Object.entries(group).map(([name, category]) => (
+                <CategoryLine key={name} name={name} category={category} />
+              ))}
+            </div>
+          )
+      )}
+    </div>
+  </div>
 ));
 
 const CategoryLine = observer(
@@ -320,15 +332,31 @@ const TransactionList = observer(() => {
     timeZone: "UTC",
   });
   return (
-    <Section name="Transactions">
-      {dates.map((date) => (
-        <Subsection key={date} name={intl.format(new Date(date).getTime())}>
-          {byDate[date].map((transaction, i) => (
-            <TransactionLine key={i} transaction={transaction} />
-          ))}
-        </Subsection>
-      ))}
-    </Section>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+        overflow: "hidden",
+      }}
+    >
+      <SectionHeader>Transactions</SectionHeader>
+      <div
+        style={{
+          overflow: "auto",
+        }}
+      >
+        {dates.map((date, i) => (
+          <div key={date}>
+            <SubsectionHeader first={!i}>
+              {intl.format(new Date(date).getTime())}
+            </SubsectionHeader>
+            {byDate[date].map((transaction, i) => (
+              <TransactionLine key={i} transaction={transaction} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 });
 
