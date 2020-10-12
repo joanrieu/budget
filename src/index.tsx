@@ -65,9 +65,8 @@ const App = observer(() => (
     }}
   >
     <div>
-      <Title />
-      <Calendar />
       <Menu />
+      <Filters />
     </div>
     <div
       style={{
@@ -107,21 +106,19 @@ const SidebarItem = observer(
 );
 
 const Title = observer(() => (
-  <SidebarItem>
-    <h1
-      style={{
-        textAlign: "center",
-        color: "firebrick",
-        fontWeight: "bold",
-        fontSize: "200%",
-        letterSpacing: ".2ch",
-        fontVariant: "small-caps",
-        padding: "16px 32px",
-      }}
-    >
-      Budget
-    </h1>
-  </SidebarItem>
+  <h1
+    style={{
+      textAlign: "center",
+      color: "firebrick",
+      fontWeight: "bold",
+      fontSize: "200%",
+      letterSpacing: ".2ch",
+      fontVariant: "small-caps",
+      padding: "16px 32px",
+    }}
+  >
+    Budget
+  </h1>
 ));
 
 const SectionHeader = observer(
@@ -165,26 +162,35 @@ const Amount = observer(
         opacity: amount ? undefined : "0.3",
       }}
     >
-      {new Intl.NumberFormat(navigator.language, {
+      {new Intl.NumberFormat(undefined, {
         style: "currency",
         currency,
+        currencyDisplay: "narrowSymbol",
         signDisplay: "exceptZero",
       } as Intl.NumberFormatOptions).format(amount)}
     </div>
   )
 );
 
-const Calendar = observer(() => (
+const Filters = observer(() => (
   <SidebarItem
     style={{
-      padding: "32px 0",
+      padding: "32px",
     }}
   >
+    <strong
+      style={{
+        display: "block",
+        marginBottom: "16px",
+        fontWeight: "bold",
+      }}
+    >
+      Filters
+    </strong>
     <form
       style={{
         display: "grid",
         gridTemplateColumns: "80px 64px",
-        padding: "0 32px",
         gap: "16px",
       }}
       onSubmit={(event) => event.preventDefault()}
@@ -213,6 +219,7 @@ const Calendar = observer(() => (
 
 const Menu = observer(() => (
   <SidebarItem>
+    <Title />
     <MenuItem page="budget">Budget</MenuItem>
     <MenuItem page="transactions">Transactions</MenuItem>
   </SidebarItem>
@@ -253,7 +260,13 @@ const CategoryList = observer(() => (
       overflow: "hidden",
     }}
   >
-    <SectionHeader>Categories</SectionHeader>
+    <SectionHeader>
+      Budget for{" "}
+      {new Intl.DateTimeFormat(undefined, {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(ui.datePrefix + 1))}
+    </SectionHeader>
     <div
       style={{
         overflow: "auto",
@@ -319,7 +332,7 @@ const TransactionList = observer(() => {
     "Date"
   );
   const dates = Object.keys(byDate).sort().reverse();
-  const intl = new Intl.DateTimeFormat(navigator.language, {
+  const intl = new Intl.DateTimeFormat(undefined, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -333,7 +346,13 @@ const TransactionList = observer(() => {
         overflow: "hidden",
       }}
     >
-      <SectionHeader>Transactions</SectionHeader>
+      <SectionHeader>
+        Transactions from{" "}
+        {new Intl.DateTimeFormat(undefined, {
+          month: "long",
+          year: "numeric",
+        }).format(new Date(ui.datePrefix + 1))}
+      </SectionHeader>
       <div
         style={{
           overflow: "auto",
