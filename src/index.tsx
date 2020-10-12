@@ -1,7 +1,7 @@
 import { filter, groupBy, sumBy } from "lodash";
 import { makeAutoObservable, runInAction } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
+import React, { CSSProperties } from "react";
 import ReactDOM from "react-dom";
 import transactions from "../transactions.json";
 import config, { Category } from "./config";
@@ -43,6 +43,8 @@ class UI {
     makeAutoObservable(this);
   }
 
+  page: "budget" | "transactions" = "budget";
+
   year = new Date().getFullYear();
   month = new Date().getMonth() + 1;
 
@@ -54,38 +56,85 @@ class UI {
 const ui = new UI();
 
 const App = observer(() => (
-  <div>
-    <Title />
-    <Calendar />
-    <CategoryList />
-    <TransactionList />
+  <div
+    style={{
+      margin: "auto",
+      maxWidth: "120ch",
+      display: "grid",
+      gridTemplateColumns: "1fr 3fr",
+    }}
+  >
+    <div style={{ overflow: "auto" }}>
+      <Title />
+      <Calendar />
+      <Menu />
+    </div>
+    <div
+      style={{
+        border: "1px solid #bbb",
+        borderWidth: "0 1px",
+        height: "100%",
+        overflow: "auto",
+        background: "#eee",
+      }}
+    >
+      {ui.page === "budget" && <CategoryList />}
+      {ui.page === "transactions" && <TransactionList />}
+    </div>
+  </div>
+));
+
+const SidebarItem = observer(({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{
+      border: "1px solid #bbb",
+      background: "#eee",
+      margin: "32px",
+      marginLeft: "0",
+    }}
+  >
+    {children}
   </div>
 ));
 
 const Title = observer(() => (
-  <h1
-    style={{
-      textAlign: "center",
-      fontWeight: "bold",
-      fontSize: "200%",
-      letterSpacing: ".2ch",
-      fontVariant: "small-caps",
-      paddingTop: "32px",
-    }}
-  >
-    Budget
-  </h1>
+  <SidebarItem>
+    <h1
+      style={{
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "200%",
+        letterSpacing: ".2ch",
+        fontVariant: "small-caps",
+        padding: "32px",
+      }}
+    >
+      Budget
+    </h1>
+  </SidebarItem>
 ));
 
 const Section = observer(
-  ({ name, children }: { name: string; children: React.ReactNode }) => (
-    <div>
+  ({
+    name,
+    children,
+    style,
+  }: {
+    name: string;
+    children: React.ReactNode;
+    style?: CSSProperties;
+  }) => (
+    <div
+      style={{
+        paddingBottom: "32px",
+        ...style,
+      }}
+    >
       <h2
         style={{
-          textAlign: "center",
           fontSize: "130%",
           letterSpacing: ".2ch",
-          padding: "16px",
+          padding: "32px",
         }}
       >
         {name}
@@ -100,7 +149,6 @@ const Subsection = observer(
     <div>
       <h3
         style={{
-          textAlign: "center",
           textTransform: "uppercase",
           fontSize: "80%",
           letterSpacing: ".2ch",
@@ -108,7 +156,7 @@ const Subsection = observer(
           background: "#ddd",
           border: "1px solid #bbb",
           borderWidth: "1px 0",
-          padding: "16px",
+          padding: "16px 32px",
         }}
       >
         {name}
@@ -118,53 +166,92 @@ const Subsection = observer(
   )
 );
 
-const Amount = ({ amount, currency }: { amount: number; currency: string }) => (
-  <div
-    style={{
-      opacity: amount ? undefined : "0.3",
-    }}
-  >
-    {new Intl.NumberFormat(navigator.language, {
-      style: "currency",
-      currency,
-      signDisplay: "exceptZero",
-    } as Intl.NumberFormatOptions).format(amount)}
-  </div>
+const Amount = observer(
+  ({ amount, currency }: { amount: number; currency: string }) => (
+    <div
+      style={{
+        opacity: amount ? undefined : "0.3",
+      }}
+    >
+      {new Intl.NumberFormat(navigator.language, {
+        style: "currency",
+        currency,
+        signDisplay: "exceptZero",
+      } as Intl.NumberFormatOptions).format(amount)}
+    </div>
+  )
 );
 
 const Calendar = observer(() => (
-  <Section name="Calendar">
-    <form
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 96px 64px 1fr",
-        gap: "16px",
-      }}
-      onSubmit={(event) => event.preventDefault()}
-    >
-      <input
-        type="number"
-        name="year"
-        defaultValue={ui.year}
-        onChange={(event) =>
-          runInAction(() => (ui.year = Number(event.target.value)))
-        }
-        style={{ fontSize: "150%", gridColumn: "2" }}
-      />
-      <input
-        type="number"
-        name="month"
-        min={1}
-        max={12}
-        defaultValue={ui.month}
-        onChange={(event) =>
-          runInAction(() => (ui.month = Number(event.target.value)))
-        }
-        style={{ fontSize: "150%", gridColumn: "3" }}
-      />
-    </form>
-  </Section>
+  <SidebarItem>
+    <Section name="Calendar">
+      <form
+        style={{
+          display: "grid",
+          gridTemplateColumns: "80px 64px",
+          padding: "0 32px",
+          gap: "16px",
+        }}
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <input
+          type="number"
+          name="year"
+          defaultValue={ui.year}
+          onChange={(event) =>
+            runInAction(() => (ui.year = Number(event.target.value)))
+          }
+          style={{ font: "inherit", padding: "8px" }}
+        />
+        <input
+          type="number"
+          name="month"
+          min={1}
+          max={12}
+          defaultValue={ui.month}
+          onChange={(event) =>
+            runInAction(() => (ui.month = Number(event.target.value)))
+          }
+          style={{ font: "inherit", padding: "8px" }}
+        />
+      </form>
+    </Section>
+  </SidebarItem>
 ));
+
+const Menu = observer(() => (
+  <SidebarItem>
+    <Section name="Menu">
+      <MenuItem page="budget">Budget</MenuItem>
+      <MenuItem page="transactions">Transactions</MenuItem>
+    </Section>
+  </SidebarItem>
+));
+
+const MenuItem = observer(
+  ({ page, children }: { page: typeof ui.page; children: React.ReactNode }) => (
+    <a
+      href="#"
+      onClick={(event) => {
+        event.preventDefault();
+        runInAction(() => {
+          ui.page = page;
+        });
+      }}
+      style={{
+        display: "block",
+        font: "inherit",
+        color: "inherit",
+        textDecoration: "inherit",
+        padding: "16px 32px",
+        background: ui.page === page ? "#ccc" : "#ddd",
+        fontWeight: ui.page === page ? "bold" : undefined,
+      }}
+    >
+      {children}
+    </a>
+  )
+);
 
 const CategoryList = observer(() => (
   <Section name="Categories">

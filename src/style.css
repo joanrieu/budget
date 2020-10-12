@@ -1,16 +1,15 @@
 @import "minireset.css";
 
+html,
+body,
+#root,
+#root > * {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: sans-serif;
   font-size: 16px;
   background: #ddd;
-}
-
-#root {
-  background: #eee;
-  border: 1px solid #bbb;
-  border-width: 0 1px;
-  box-shadow: 0 0 16px #eee;
-  margin: auto;
-  max-width: 60ch;
 }
