@@ -111,11 +111,12 @@ const Title = observer(() => (
     <h1
       style={{
         textAlign: "center",
+        color: "firebrick",
         fontWeight: "bold",
         fontSize: "200%",
         letterSpacing: ".2ch",
         fontVariant: "small-caps",
-        padding: "32px",
+        padding: "16px 32px",
       }}
     >
       Budget
@@ -130,7 +131,7 @@ const SectionHeader = observer(
         fontSize: "130%",
         letterSpacing: ".2ch",
         padding: "32px 32px 16px",
-        borderBottom: "1px solid #bbb",
+        borderBottom: "4px solid firebrick",
       }}
     >
       {children}
@@ -139,7 +140,7 @@ const SectionHeader = observer(
 );
 
 const SubsectionHeader = observer(
-  ({ first, children }: { first: boolean; children: React.ReactNode }) => (
+  ({ children }: { children: React.ReactNode }) => (
     <h3
       style={{
         textTransform: "uppercase",
@@ -148,7 +149,7 @@ const SubsectionHeader = observer(
         color: "grey",
         background: "#ddd",
         border: "1px solid #bbb",
-        borderWidth: first ? "0 0 1px" : "1px 0",
+        borderWidth: "1px 0",
         padding: "16px 32px",
       }}
     >
@@ -195,7 +196,6 @@ const Calendar = observer(() => (
         onChange={(event) =>
           runInAction(() => (ui.year = Number(event.target.value)))
         }
-        style={{ font: "inherit", padding: "8px" }}
       />
       <input
         type="number"
@@ -206,7 +206,6 @@ const Calendar = observer(() => (
         onChange={(event) =>
           runInAction(() => (ui.month = Number(event.target.value)))
         }
-        style={{ font: "inherit", padding: "8px" }}
       />
     </form>
   </SidebarItem>
@@ -229,21 +228,16 @@ const MenuItem = observer(
           ui.page = page;
         });
       }}
+      className={ui.page === page ? "active" : undefined}
       style={{
         display: "block",
-        font: "inherit",
-        color: "inherit",
-        textDecoration: "inherit",
         lineHeight: 3,
         padding: "0 32px",
         ...(ui.page === page
           ? {
-              fontWeight: "bold",
               borderRight: "4px solid firebrick",
             }
-          : {
-              background: "#ddd",
-            }),
+          : {}),
       }}
     >
       {children}
@@ -266,10 +260,10 @@ const CategoryList = observer(() => (
       }}
     >
       {Object.entries(config.budget.groups).map(
-        ([name, group], i) =>
+        ([name, group]) =>
           !isGroupExcluded(name) && (
             <div key={name}>
-              <SubsectionHeader first={!i}>{name}</SubsectionHeader>
+              <SubsectionHeader>{name}</SubsectionHeader>
               {Object.entries(group).map(([name, category]) => (
                 <CategoryLine key={name} name={name} category={category} />
               ))}
@@ -345,9 +339,9 @@ const TransactionList = observer(() => {
           overflow: "auto",
         }}
       >
-        {dates.map((date, i) => (
+        {dates.map((date) => (
           <div key={date}>
-            <SubsectionHeader first={!i}>
+            <SubsectionHeader>
               {intl.format(new Date(date).getTime())}
             </SubsectionHeader>
             {byDate[date].map((transaction, i) => (

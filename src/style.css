@@ -1,5 +1,13 @@
 @import "minireset.css";
 
+* {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  text-decoration: inherit;
+}
+
 html,
 body,
 #root,
@@ -12,4 +20,14 @@ body {
   font-family: sans-serif;
   font-size: 16px;
   background: #ddd;
+}
+
+input {
+  border: 1px solid #bbb;
+  padding: 8px;
+}
+
+a.active,
+a:hover {
+  font-weight: bold;
 }
